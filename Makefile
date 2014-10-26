@@ -3,19 +3,28 @@
 # Quantal is broken
 RELEASES = precise trusty
 IMAGES = $(foreach release,$(RELEASES),$(release)-desktop-i386 $(release)-desktop-amd64)
-BOXES = $(foreach image,$(IMAGES),$(image).box)
+BOXES = $(foreach image,$(IMAGES),$(image))
 
-.PHONY: all
-all: $(BOXES)
-
-.PHONY: $(BOXES)
+.PHONY: init all $(BOXES)
 .NOTPARALLEL: $(BOXES)
-$(BOXES): %.box:
-	vagrant up $*
-	vagrant package $* --output $*.box
-	vagrant destroy --force $*
 
-.PHONY: clean
-clean:
+init:
+	mkdir -p build
+
+build-all: init $(BOXES)
+
+$(BOXES): %: init
+	vagrant up $*
+	vagrant package $* --output build/$*.box
+	vagrant destroy --force $*
+	vagrant box add build/$*.box --name $*.box
+
+.PHONY: clean clean-vagrant clean-build
+
+clean: clean-vagrant clean-build
+
+clean-vagrant:
 	vagrant destroy --force
-	rm -f *.box
+
+clean-build:
+	rm -rf build
