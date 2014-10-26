@@ -17,7 +17,7 @@ $(BOXES): %: init
 	vagrant up $*
 	vagrant package $* --output build/$*.box
 	vagrant destroy --force $*
-	vagrant box add build/$*.box --name $*.box
+	vagrant box add --force build/$*.box --name $*.box
 
 .PHONY: clean clean-vagrant clean-build
 
